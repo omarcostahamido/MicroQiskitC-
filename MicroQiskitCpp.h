@@ -61,7 +61,7 @@ class QuantumCircuit {
       }
       // TO DO: It is only possible to add circuits with equal nQubits in MicroQiskit, and qc2.nBits cannot be non-zero if qc.nBits is.
       // Abort and explain if the user provides other inputs.
-      //^ I don't understand this...
+      //^ review this...
     }
 
     void initialize (vector<double> p){
@@ -398,10 +398,6 @@ class Simulator {
         for (int j=0; j<probs.size();j++){
           cumu += probs[j];//this will add up to 1  
           if ((r<=cumu) && un){
-            // string long_out = bitset<N_QUBITS_MAX>(j).to_string(); //
-            // cout<<"long_out: "<<long_out<<endl;
-            // string out = long_out.substr (N_QUBITS_MAX-qc.nQubits,N_QUBITS_MAX);
-            //TODO remove this old version :)
             
             //here is my version:
             for( int w=0; w<bitstr.size(); w++ ){
@@ -432,7 +428,6 @@ class Simulator {
     }
 
     string get_qiskit () {
-      // TODO: can we make this print QASM-ready code?
       string qiskitPy;
 
       if (qc.nBits==0){
@@ -497,7 +492,7 @@ class Simulator {
             qasm += "crx("+qc.data[g][1]+") q["+qc.data[g][2]+"],q["+qc.data[g][3]+"];\n";
           } else if (qc.data[g][0]=="m") {
             qasm += "measure q["+qc.data[g][1]+"] -> c["+qc.data[g][2]+"];\n";
-          // I don't think qasm has this...
+          // and...
           //} else if (qc.data[g][0]=="init") {
             ////TODO review to really conform with qiskit
             //qasm += "qc.initialize({"+qc.data[g][2];
