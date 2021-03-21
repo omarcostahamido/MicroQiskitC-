@@ -111,6 +111,18 @@ class QuantumCircuit {
       gate.push_back(to_string(t));
       data.push_back(gate);
     }
+    //new ccx gate
+    void ccx (int r, int s, int t) { 
+      vector<string> gate;
+      verify_qubit_range(r,"ccx gate");
+      verify_qubit_range(s,"ccx gate");
+      verify_qubit_range(t,"ccx gate");
+      gate.push_back("ccx");
+      gate.push_back(to_string(r));
+      gate.push_back(to_string(s));
+      gate.push_back(to_string(t));
+      data.push_back(gate);
+    }
     //new ch gate
     void ch (int s, int t) { 
       vector<string> gate;
@@ -330,7 +342,27 @@ class Simulator {
             }
           }
         }
+      //new ccx gate
+      } else if ( (qc.data[g][0]=="ccx") ){
+        int r, s, t, l, h, m;
+        r = stoi( qc.data[g][qc.data[g].size()-3] );
+        s = stoi( qc.data[g][qc.data[g].size()-2] );
+        t = stoi( qc.data[g][qc.data[g].size()-1] );
+        
+        int b0,b1;
+        b0 = pow(2,r) + pow(2,s);
+        b1 = b0 + pow(2,t);
+
+        vector<double> e0, e1;
+        e0 = ket[b0];
+        e1 = ket[b1];
+
+        if (qc.data[g][0]=="ccx"){
+          ket[b0] = e1;
+          ket[b1] = e0;
+        }
       }
+      // TODO: add ox, ocx, oox, and och gates
 
     }
 
@@ -490,6 +522,10 @@ class Simulator {
             qasm += "ch q["+qc.data[g][1]+"],q["+qc.data[g][2]+"];\n";
           } else if (qc.data[g][0]=="crx") {
             qasm += "crx("+qc.data[g][1]+") q["+qc.data[g][2]+"],q["+qc.data[g][3]+"];\n";
+          } else if (qc.data[g][0]=="ccx") {
+            qasm += "ccx q["+qc.data[g][1]+"],q["+qc.data[g][2]+"],q["+qc.data[g][3]+"];\n";
+          } else if (qc.data[g][0]=="ccx") {
+            qasm += "ccx q["+qc.data[g][1]+"],q["+qc.data[g][2]+"],q["+qc.data[g][3]+"];\n";
           } else if (qc.data[g][0]=="m") {
             qasm += "measure q["+qc.data[g][1]+"] -> c["+qc.data[g][2]+"];\n";
           // and...
