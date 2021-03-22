@@ -16,23 +16,23 @@ int main () {
 
   // initialize a circuit with two qubits 
   QuantumCircuit qc;
-  qc.set_registers(5);  
+  qc.set_registers(4);
   // add the gates to create a Bell pair
   qc.h(0);
-  // qc.cx(0,1);
-  qc.x(2);
   qc.x(1);
-  qc.ccx(2,0,1);
+  qc.x(2);
+  qc.ccx(1,2,3);
+  // qc.ccx(2,0,1);
 
   // initialize another circuit with two qubits and two output bits
   QuantumCircuit meas;
-  meas.set_registers(5,5);
+  meas.set_registers(4,4);
   // add the measurements
   meas.measure(0,0);
   meas.measure(1,1);
   meas.measure(2,2);
   meas.measure(3,3);
-  meas.measure(4,4);
+  // meas.measure(4,4);
 
   // add the measurement circuit to the end of the original circuit
   qc.add(meas);
@@ -58,6 +58,14 @@ int main () {
   
     cout << "Counts for "+bitstring+" = " << count << "\n";
 
+  }
+  // and also get the statevector
+  vector<complex<double>> ket0 = result.get_statevector();
+
+  // let's print this to screen
+  cout << "\nThe statevector is:" << endl;
+  for (int j=0; j<ket0.size(); j++){
+    cout << "(" << real(ket0[j]) << ") + (" << imag(ket0[j]) << ")" <<  "*i" << endl;
   }
 
   // cout<<"my own quick tests"<<endl;

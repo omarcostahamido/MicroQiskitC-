@@ -348,22 +348,56 @@ class Simulator {
         }
       //new ccx gate
       } else if ( (qc.data[g][0]=="ccx") ){
-        int r, s, t, l, h, m;
-        r = stoi( qc.data[g][qc.data[g].size()-3] );
-        s = stoi( qc.data[g][qc.data[g].size()-2] );
+        int s0, s1, t, l, h, m;
+        s0 = stoi( qc.data[g][qc.data[g].size()-3] );
+        s1 = stoi( qc.data[g][qc.data[g].size()-2] );
         t = stoi( qc.data[g][qc.data[g].size()-1] );
         
-        int b0,b1;
-        b0 = pow(2,r) + pow(2,s);
-        b1 = b0 + pow(2,t);
+        if (s1>t){
+          h = s1;
+          l = t;
+          m = s0;
+          if (s0>s1){
+            h = s0;
+            m = s1;
+          } else {
+            if (s0<t){
+              l = s0;
+              m = t;
+            }
+          }
+        } else {
+          h = t;
+          l = s1;
+          m = s0;
+          if (s0>t){
+            h = s0;
+            m = t;
+          } else {
+            if (s0<s1){
+              l = s0;
+              m = s1;
+            }
+          }
+        }
 
-        vector<double> e0, e1;
-        e0 = ket[b0];
-        e1 = ket[b1];
+        for (int i0=0; i0<pow(2,l); i0++){
+          for (int i1=0; i1<pow(2,h-m-1); i1++){
+            for (int i2=0; i2<pow(2,qc.nQubits-h-1); i2++){
+              int b0,b1;
+              b0 = i0 + pow(2,s0) + pow(2,s1);
+              b1 = b0 + pow(2,t);
 
-        if (qc.data[g][0]=="ccx"){
-          ket[b0] = e1;
-          ket[b1] = e0;
+              vector<double> e0, e1;
+              e0 = ket[b0];
+              e1 = ket[b1];
+
+              if (qc.data[g][0]=="ccx"){
+                ket[b0] = e1;
+                ket[b1] = e0;
+              }
+            }
+          }
         }
       }
       // TODO: add ox, ocx, oox, and och gates
