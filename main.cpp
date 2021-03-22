@@ -16,7 +16,7 @@ int main () {
 
   // initialize a circuit with two qubits 
   QuantumCircuit qc;
-  qc.set_registers(4);
+  qc.set_registers(5);
   // add the gates to create a Bell pair
   qc.h(0);
   qc.x(1);
@@ -26,13 +26,13 @@ int main () {
 
   // initialize another circuit with two qubits and two output bits
   QuantumCircuit meas;
-  meas.set_registers(4,4);
+  meas.set_registers(5,5);
   // add the measurements
   meas.measure(0,0);
   meas.measure(1,1);
   meas.measure(2,2);
   meas.measure(3,3);
-  // meas.measure(4,4);
+  meas.measure(4,4);
 
   // add the measurement circuit to the end of the original circuit
   qc.add(meas);

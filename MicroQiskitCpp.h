@@ -385,7 +385,7 @@ class Simulator {
           for (int i1=0; i1<pow(2,h-m-1); i1++){
             for (int i2=0; i2<pow(2,qc.nQubits-h-1); i2++){
               int b0,b1;
-              b0 = i0 + pow(2,s0) + pow(2,s1);
+              b0 = i0 + pow(2,m+1)*i1 + pow(2,h+1)*i2 + pow(2,s0) + pow(2,s1);
               b1 = b0 + pow(2,t);
 
               vector<double> e0, e1;
