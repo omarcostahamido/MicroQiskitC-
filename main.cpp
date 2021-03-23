@@ -20,8 +20,9 @@ int main () {
   // add the gates to create a Bell pair
   qc.h(0);
   qc.x(1);
-  qc.x(2);
-  qc.ccx(1,2,3);
+  qc.h(2);
+  qc.x(3);
+  qc.ccx(1,3,4);
   // qc.ccx(2,0,1);
 
   // initialize another circuit with two qubits and two output bits
