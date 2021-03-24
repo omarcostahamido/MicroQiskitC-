@@ -115,17 +115,28 @@ class QuantumCircuit {
       gate.push_back(to_string(t));
       data.push_back(gate);
     }
-    //new ccx gate
-    void ccx (int r, int s, int t) { 
-      vector<string> gate;
-      verify_qubit_range(r,"ccx gate");
-      verify_qubit_range(s,"ccx gate");
-      verify_qubit_range(t,"ccx gate");
-      gate.push_back("ccx");
-      gate.push_back(to_string(r));
-      gate.push_back(to_string(s));
-      gate.push_back(to_string(t));
-      data.push_back(gate);
+    //new ox gate
+    void ox (int s, int t) { 
+      //use X
+      vector<string> gateX0;
+      verify_qubit_range(s,"ox gate");
+      gateX0.push_back("x");
+      gateX0.push_back(to_string(s));
+      data.push_back(gateX0);
+      //use CX
+      vector<string> gateCX;
+      verify_qubit_range(s,"ox gate");
+      verify_qubit_range(t,"ox gate");
+      gateCX.push_back("cx");
+      gateCX.push_back(to_string(s));
+      gateCX.push_back(to_string(t));
+      data.push_back(gateCX);
+      //remove X
+      vector<string> gateX1;
+      verify_qubit_range(s,"ox gate");
+      gateX1.push_back("x");
+      gateX1.push_back(to_string(s));
+      data.push_back(gateX1);
     }
     //new ch gate
     void ch (int s, int t) { 
@@ -136,6 +147,177 @@ class QuantumCircuit {
       gate.push_back(to_string(s));
       gate.push_back(to_string(t));
       data.push_back(gate);
+    }
+    //new oh gate
+    void oh (int s, int t) { 
+      //use X
+      vector<string> gateX0;
+      verify_qubit_range(s,"oh gate");
+      gateX0.push_back("x");
+      gateX0.push_back(to_string(s));
+      data.push_back(gateX0);
+      //use CH
+      vector<string> gateCH;
+      verify_qubit_range(s,"oh gate");
+      verify_qubit_range(t,"oh gate");
+      gateCH.push_back("ch");
+      gateCH.push_back(to_string(s));
+      gateCH.push_back(to_string(t));
+      data.push_back(gateCH);
+      //remove X
+      vector<string> gateX1;
+      verify_qubit_range(s,"oh gate");
+      gateX1.push_back("x");
+      gateX1.push_back(to_string(s));
+      data.push_back(gateX1);
+    }
+    //new ccx gate
+    void ccx (int s0, int s1, int t) { 
+      vector<string> gate;
+      verify_qubit_range(s0,"ccx gate");
+      verify_qubit_range(s1,"ccx gate");
+      verify_qubit_range(t,"ccx gate");
+      gate.push_back("ccx");
+      gate.push_back(to_string(s0));
+      gate.push_back(to_string(s1));
+      gate.push_back(to_string(t));
+      data.push_back(gate);
+    }
+    //new oox gate
+    void oox (int s0, int s1, int t) { 
+      //use Xs0
+      vector<string> gateXs0;
+      verify_qubit_range(s0,"oox gate");
+      gateXs0.push_back("x");
+      gateXs0.push_back(to_string(s0));
+      data.push_back(gateXs0);
+      //use Xs1
+      vector<string> gateXs1;
+      verify_qubit_range(s1,"oox gate");
+      gateXs1.push_back("x");
+      gateXs1.push_back(to_string(s1));
+      data.push_back(gateXs1);
+      //use ccx
+      vector<string> gateCCX;
+      verify_qubit_range(s0,"oox gate");
+      verify_qubit_range(s1,"oox gate");
+      verify_qubit_range(t,"oox gate");
+      gateCCX.push_back("ccx");
+      gateCCX.push_back(to_string(s0));
+      gateCCX.push_back(to_string(s1));
+      gateCCX.push_back(to_string(t));
+      data.push_back(gateCCX);
+      //use Xs0
+      vector<string> gateXs2;
+      verify_qubit_range(s0,"oox gate");
+      gateXs2.push_back("x");
+      gateXs2.push_back(to_string(s0));
+      data.push_back(gateXs2);
+      //use Xs1
+      vector<string> gateXs3;
+      verify_qubit_range(s1,"oox gate");
+      gateXs3.push_back("x");
+      gateXs3.push_back(to_string(s1));
+      data.push_back(gateXs3);
+    }
+    //new ocx gate
+    void ocx (int s0, int s1, int t) { 
+      //use X
+      vector<string> gateX0;
+      verify_qubit_range(s0,"ocx gate");
+      gateX0.push_back("x");
+      gateX0.push_back(to_string(s0));
+      data.push_back(gateX0);
+      //use cch
+      vector<string> gateCCX;
+      verify_qubit_range(s0,"ocx gate");
+      verify_qubit_range(s1,"ocx gate");
+      verify_qubit_range(t,"ocx gate");
+      gateCCX.push_back("ccx");
+      gateCCX.push_back(to_string(s0));
+      gateCCX.push_back(to_string(s1));
+      gateCCX.push_back(to_string(t));
+      data.push_back(gateCCX);
+      //use X
+      vector<string> gateX1;
+      verify_qubit_range(s0,"ocx gate");
+      gateX1.push_back("x");
+      gateX1.push_back(to_string(s0));
+      data.push_back(gateX1);
+    }
+    //new cch gate
+    void cch (int s0, int s1, int t) { 
+      vector<string> gate;
+      verify_qubit_range(s0,"cch gate");
+      verify_qubit_range(s1,"cch gate");
+      verify_qubit_range(t,"cch gate");
+      gate.push_back("cch");
+      gate.push_back(to_string(s0));
+      gate.push_back(to_string(s1));
+      gate.push_back(to_string(t));
+      data.push_back(gate);
+    }
+    //new ooh gate
+    void ooh (int s0, int s1, int t) { 
+      //use Xs0
+      vector<string> gateXs0;
+      verify_qubit_range(s0,"ooh gate");
+      gateXs0.push_back("x");
+      gateXs0.push_back(to_string(s0));
+      data.push_back(gateXs0);
+      //use Xs1
+      vector<string> gateXs1;
+      verify_qubit_range(s1,"ooh gate");
+      gateXs1.push_back("x");
+      gateXs1.push_back(to_string(s1));
+      data.push_back(gateXs1);
+      //use cch
+      vector<string> gateCCH;
+      verify_qubit_range(s0,"ooh gate");
+      verify_qubit_range(s1,"ooh gate");
+      verify_qubit_range(t,"ooh gate");
+      gateCCH.push_back("cch");
+      gateCCH.push_back(to_string(s0));
+      gateCCH.push_back(to_string(s1));
+      gateCCH.push_back(to_string(t));
+      data.push_back(gateCCH);
+      //use Xs0
+      vector<string> gateXs2;
+      verify_qubit_range(s0,"ooh gate");
+      gateXs2.push_back("x");
+      gateXs2.push_back(to_string(s0));
+      data.push_back(gateXs2);
+      //use Xs1
+      vector<string> gateXs3;
+      verify_qubit_range(s1,"ooh gate");
+      gateXs3.push_back("x");
+      gateXs3.push_back(to_string(s1));
+      data.push_back(gateXs3);
+    }
+    //new och gate
+    void och (int s0, int s1, int t) { 
+      //use X
+      vector<string> gateX0;
+      verify_qubit_range(s0,"och gate");
+      gateX0.push_back("x");
+      gateX0.push_back(to_string(s0));
+      data.push_back(gateX0);
+      //use cch
+      vector<string> gateCCH;
+      verify_qubit_range(s0,"och gate");
+      verify_qubit_range(s1,"och gate");
+      verify_qubit_range(t,"och gate");
+      gateCCH.push_back("cch");
+      gateCCH.push_back(to_string(s0));
+      gateCCH.push_back(to_string(s1));
+      gateCCH.push_back(to_string(t));
+      data.push_back(gateCCH);
+      //use X
+      vector<string> gateX1;
+      verify_qubit_range(s0,"och gate");
+      gateX1.push_back("x");
+      gateX1.push_back(to_string(s0));
+      data.push_back(gateX1);
     }
     //new crx gate
     void crx (double theta, int s, int t) { 
@@ -346,8 +528,8 @@ class Simulator {
             }
           }
         }
-      //new ccx gate
-      } else if ( (qc.data[g][0]=="ccx") ){
+      //new ccx and cch gate
+      } else if ( (qc.data[g][0]=="ccx") or (qc.data[g][0]=="cch") ){
         int s0, s1, t, l, h, m;
         s0 = stoi( qc.data[g][qc.data[g].size()-3] );
         s1 = stoi( qc.data[g][qc.data[g].size()-2] );
@@ -396,6 +578,12 @@ class Simulator {
                 if (qc.data[g][0]=="ccx"){
                   ket[b0] = e1;
                   ket[b1] = e0;
+                } else if (qc.data[g][0]=="cch"){
+                  //TODO review
+                  for (int k=0; k<2; k++){
+                    ket[b0][k] = (e0[k] + e1[k])/sqrt(2);
+                    ket[b1][k] = (e0[k] - e1[k])/sqrt(2);
+                  }
                 }
               }
             }

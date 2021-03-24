@@ -12,17 +12,17 @@ int main () {
   // cout << "\nFor the standard version of Qiskit, see qiskit.org. To run your quantum programs\non real quantum hardware, see quantum-computing.ibm.com." << endl;
   // cout << "===================================================================================\n" << endl;
 
-  cout << "\n**We start with a Bell pair: the standard 'Hello World' of quantum computing.**" << endl;
+  cout << "\n**these are my own tests. original code commented out**" << endl;
 
   // initialize a circuit with two qubits 
   QuantumCircuit qc;
   qc.set_registers(5);
   // add the gates to create a Bell pair
   qc.h(0);
-  qc.x(1);
-  qc.h(2);
+  // qc.x(1);
+  // qc.h(2);
   qc.x(3);
-  qc.ccx(1,3,4);
+  qc.och(1,3,4);
   // qc.ccx(2,0,1);
 
   // initialize another circuit with two qubits and two output bits
