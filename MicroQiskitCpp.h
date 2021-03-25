@@ -591,7 +591,6 @@ class Simulator {
           }
         }
       }
-      // TODO: add ox, ocx, oox, and och gates
 
     }
 
@@ -710,6 +709,10 @@ class Simulator {
             qiskitPy += "qc.ch("+qc.data[g][1]+","+qc.data[g][2]+")\n";
           } else if (qc.data[g][0]=="crx") {
             qiskitPy += "qc.crx("+qc.data[g][1]+","+qc.data[g][2]+","+qc.data[g][3]+")\n";
+          } else if (qc.data[g][0]=="ccx") {
+            qiskitPy += "qc.ccx("+qc.data[g][1]+","+qc.data[g][2]+","+qc.data[g][3]+")\n";
+          } else if (qc.data[g][0]=="cch") {
+            qiskitPy += "qc.cch("+qc.data[g][1]+","+qc.data[g][2]+","+qc.data[g][3]+")\n";
           } else if (qc.data[g][0]=="m") {
             qiskitPy += "qc.measure("+qc.data[g][1]+","+qc.data[g][2]+")\n";
           } else if (qc.data[g][0]=="init") {
@@ -753,8 +756,8 @@ class Simulator {
             qasm += "crx("+qc.data[g][1]+") q["+qc.data[g][2]+"],q["+qc.data[g][3]+"];\n";
           } else if (qc.data[g][0]=="ccx") {
             qasm += "ccx q["+qc.data[g][1]+"],q["+qc.data[g][2]+"],q["+qc.data[g][3]+"];\n";
-          } else if (qc.data[g][0]=="ccx") {
-            qasm += "ccx q["+qc.data[g][1]+"],q["+qc.data[g][2]+"],q["+qc.data[g][3]+"];\n";
+          } else if (qc.data[g][0]=="cch") {
+            qasm += "cch q["+qc.data[g][1]+"],q["+qc.data[g][2]+"],q["+qc.data[g][3]+"];\n";
           } else if (qc.data[g][0]=="m") {
             qasm += "measure q["+qc.data[g][1]+"] -> c["+qc.data[g][2]+"];\n";
           // and...
