@@ -14,15 +14,19 @@ int main () {
 
   cout << "\n**these are my own tests. original code commented out**" << endl;
 
+
   // initialize a circuit with two qubits 
   QuantumCircuit qc;
   qc.set_registers(5);
   // add the gates to create a Bell pair
-  qc.h(0);
-  // qc.x(1);
-  // qc.h(2);
+  // qc.h(0);
   qc.x(3);
-  qc.och(1,3,4);
+  qc.x(1);
+  qc.x(2);
+  qc.cccx(3, 1, 2, 4);
+  // qc.h(2);
+  // qc.x(3);
+  // qc.och(1,3,4);
   // qc.ccx(2,0,1);
 
   // initialize another circuit with two qubits and two output bits

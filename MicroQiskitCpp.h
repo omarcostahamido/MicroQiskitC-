@@ -19,6 +19,7 @@ In development on replit (https://repl.it/@quantum_jim/MicroQiskitC) and on gith
 #include <complex>  
 #include <ctime>
 #include <map>
+#include <list>
 #define RESET   "\033[0m"
 #define RED     "\033[31m"      /* Red */
 #define ERROR(MESSAGE) error_handler(MESSAGE)
@@ -330,6 +331,20 @@ class QuantumCircuit {
       gate.push_back(to_string(t));
       data.push_back(gate);
     }
+    // new cccx gate
+    void cccx (int s0, int s1, int s2, int t) { 
+      vector<string> gate;
+      verify_qubit_range(s0,"ccx gate");
+      verify_qubit_range(s1,"ccx gate");
+      verify_qubit_range(s2,"ccx gate");
+      verify_qubit_range(t,"ccx gate");
+      gate.push_back("cccx");
+      gate.push_back(to_string(s0));
+      gate.push_back(to_string(s1));
+      gate.push_back(to_string(s2));
+      gate.push_back(to_string(t));
+      data.push_back(gate);
+    }
     void measure (int q, int b) {
       vector<string> gate;
       if(!(q==b) )
@@ -455,18 +470,25 @@ class Simulator {
         q = stoi( qc.data[g][qc.data[g].size()-1] );
         //retrieve the last qubit number from the gate vector (target) as an int, e.g. <"h","0"> = 0
 
+        // example qc (2,2), x 1
         for (int i0=0; i0<pow(2,q); i0++){
+          // runs 2 times
           for (int i1=0; i1<pow(2,qc.nQubits-q-1); i1++){
+            // runs 1 times
             int b0,b1;
-            b0 = i0 + int(pow(2,q+1)) * i1;
-            b1 = b0 + int(pow(2,q));
+            b0 = i0 + int(pow(2,q+1)) * i1; // b0 = 0 + 4*0
+            // 2nd: b0 = 1 + 4*0
+            b1 = b0 + int(pow(2,q)); // b1 = 0 + 2
+            // 2nd: b1 = 1 + 2
 
             vector<double> e0, e1;
-            e0 = ket[b0];
-            e1 = ket[b1];
+            e0 = ket[b0]; // <1.0, 0.0>
+            // what if we had started with ket = <<0.0, 0.0> <0.0, 0.0> <1.0, 0.0> <0.0, 0.0>>
+            e1 = ket[b1]; // <0.0, 0.0>
 
             if (qc.data[g][0]=="x"){
-              ket[b0] = e1;
+              ket[b0] = e1; //swap them
+              // 2nd: swap ket[2] and ket[3]
               ket[b1] = e0;
             } else if (qc.data[g][0]=="rx"){
               double theta = stof( qc.data[g][1] );
@@ -499,11 +521,13 @@ class Simulator {
         for (int i0=0; i0<pow(2,l); i0++){
           for (int i1=0; i1<pow(2,h-l-1); i1++){
             for (int i2=0; i2<pow(2,qc.nQubits-h-1); i2++){
+              
               int b0,b1;
               b0 = i0 + pow(2,l+1)*i1 + pow(2,h+1)*i2 + pow(2,s);
               b1 = b0 + pow(2,t);
 
               vector<double> e0, e1;
+
               e0 = ket[b0];
               e1 = ket[b1];
 
@@ -567,11 +591,13 @@ class Simulator {
           for (int i1=0; i1<pow(2,m-l-1); i1++){
             for (int i2=0; i2<pow(2,h-m-1); i2++){
               for (int i3=0; i3<pow(2,qc.nQubits-h-1); i3++){
+
                 int b0,b1;
                 b0 = i0 + pow(2,l+1)*i1 + pow(2,m+1)*i2 + pow(2,h+1)*i3 + pow(2,s0) + pow(2,s1);
                 b1 = b0 + pow(2,t);
 
                 vector<double> e0, e1;
+
                 e0 = ket[b0];
                 e1 = ket[b1];
 
@@ -583,6 +609,56 @@ class Simulator {
                   for (int k=0; k<2; k++){
                     ket[b0][k] = (e0[k] + e1[k])/sqrt(2);
                     ket[b1][k] = (e0[k] - e1[k])/sqrt(2);
+                  }
+                }
+              }
+            }
+            
+          }
+        }
+      //}
+      //new cccx gate
+      } else if ( (qc.data[g][0]=="cccx") ){
+        int s0, s1, s2, t, l, h, m1, m2;
+        list<int> mylist;
+        s0 = stoi( qc.data[g][qc.data[g].size()-4] );
+        mylist.push_back (s0);
+        s1 = stoi( qc.data[g][qc.data[g].size()-3] );
+        mylist.push_back (s1);
+        s2 = stoi( qc.data[g][qc.data[g].size()-2] );
+        mylist.push_back (s2);
+        t = stoi( qc.data[g][qc.data[g].size()-1] );
+        mylist.push_back (t);
+        
+        // new way to order qubits:
+        mylist.sort();
+        l = mylist.front();
+        mylist.pop_front();
+        m1 = mylist.front();
+        mylist.pop_front();
+        m2 = mylist.front();
+        mylist.pop_front();
+        h = mylist.front();
+        mylist.pop_front();
+
+        for (int i0=0; i0<pow(2,l); i0++){
+          for (int i1=0; i1<pow(2,m1-l-1); i1++){
+            for (int i2=0; i2<pow(2,m2-m1-1); i2++){
+              for (int i3=0; i3<pow(2,h-m2-1); i3++){
+                for (int i4=0; i4<pow(2,qc.nQubits-h-1); i4++){
+
+                  int b0,b1;
+                  b0 = i0 + pow(2,l+1)*i1 + pow(2,m1+1)*i2 + pow(2,m2+1)*i3 + pow(2,h+1)*i4 + pow(2,s0) + pow(2,s1) + pow(2,s2);
+                  b1 = b0 + pow(2,t);
+
+                  vector<double> e0, e1;
+
+                  e0 = ket[b0];
+                  e1 = ket[b1];
+
+                  if (qc.data[g][0]=="cccx"){
+                    ket[b0] = e1;
+                    ket[b1] = e0;
                   }
                 }
               }
