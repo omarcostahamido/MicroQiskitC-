@@ -464,31 +464,28 @@ class Simulator {
             ket[i/2][i%2] = stod(qc.data[g][2+i]);
           }
         }
+
       } else if ( (qc.data[g][0]=="x") or (qc.data[g][0]=="rx") or (qc.data[g][0]=="h") ) {
 
         int q;
         q = stoi( qc.data[g][qc.data[g].size()-1] );
         //retrieve the last qubit number from the gate vector (target) as an int, e.g. <"h","0"> = 0
 
-        // example qc (2,2), x 1
+        // example qc (1,1), rx 0 pi
         for (int i0=0; i0<pow(2,q); i0++){
-          // runs 2 times
+          // runs 1 times
           for (int i1=0; i1<pow(2,qc.nQubits-q-1); i1++){
             // runs 1 times
             int b0,b1;
-            b0 = i0 + int(pow(2,q+1)) * i1; // b0 = 0 + 4*0
-            // 2nd: b0 = 1 + 4*0
-            b1 = b0 + int(pow(2,q)); // b1 = 0 + 2
-            // 2nd: b1 = 1 + 2
+            b0 = i0 + int(pow(2,q+1)) * i1; // b0 = 0 + 1*0
+            b1 = b0 + int(pow(2,q)); // b1 = 0 + 1
 
             vector<double> e0, e1;
             e0 = ket[b0]; // <1.0, 0.0>
-            // what if we had started with ket = <<0.0, 0.0> <0.0, 0.0> <1.0, 0.0> <0.0, 0.0>>
             e1 = ket[b1]; // <0.0, 0.0>
 
             if (qc.data[g][0]=="x"){
-              ket[b0] = e1; //swap them
-              // 2nd: swap ket[2] and ket[3]
+              ket[b0] = e1;
               ket[b1] = e0;
             } else if (qc.data[g][0]=="rx"){
               double theta = stof( qc.data[g][1] );
@@ -789,6 +786,8 @@ class Simulator {
             qiskitPy += "qc.ccx("+qc.data[g][1]+","+qc.data[g][2]+","+qc.data[g][3]+")\n";
           } else if (qc.data[g][0]=="cch") {
             qiskitPy += "qc.cch("+qc.data[g][1]+","+qc.data[g][2]+","+qc.data[g][3]+")\n";
+          } else if (qc.data[g][0]=="cccx") {
+            qiskitPy += "qc.mct(["+qc.data[g][1]+","+qc.data[g][2]+","+qc.data[g][3]+"],"+qc.data[g][4]+")\n";
           } else if (qc.data[g][0]=="m") {
             qiskitPy += "qc.measure("+qc.data[g][1]+","+qc.data[g][2]+")\n";
           } else if (qc.data[g][0]=="init") {
@@ -817,6 +816,7 @@ class Simulator {
         qasm += "creg c["+to_string(qc.nBits)+"];\n"; 
       }
       // gates
+      bool cccxdefined = false;
       for (int g=0; g<qc.data.size(); g++){
           if (qc.data[g][0]=="x"){
             qasm += "x q["+qc.data[g][1]+"];\n";
@@ -834,6 +834,12 @@ class Simulator {
             qasm += "ccx q["+qc.data[g][1]+"],q["+qc.data[g][2]+"],q["+qc.data[g][3]+"];\n";
           } else if (qc.data[g][0]=="cch") {
             qasm += "cch q["+qc.data[g][1]+"],q["+qc.data[g][2]+"],q["+qc.data[g][3]+"];\n";
+          } else if (qc.data[g][0]=="cccx") {
+            if (!cccxdefined){
+              qasm += "gate cccx q0,q1,q2,q3 { h q3; p(pi/8) q0; p(pi/8) q1; p(pi/8) q2; p(pi/8) q3; cx q0,q1; p(-pi/8) q1; cx q0,q1; cx q1,q2; p(-pi/8) q2; cx q0,q2; p(pi/8) q2; cx q1,q2; p(-pi/8) q2; cx q0,q2; cx q2,q3; p(-pi/8) q3; cx q1,q3; p(pi/8) q3; cx q2,q3; p(-pi/8) q3; cx q0,q3; p(pi/8) q3; cx q2,q3; p(-pi/8) q3; cx q1,q3; p(pi/8) q3; cx q2,q3; p(-pi/8) q3; cx q0,q3; h q3; }\n";
+              cccxdefined = true;
+            }
+            qasm += "cccx q["+qc.data[g][1]+"],q["+qc.data[g][2]+"],q["+qc.data[g][3]+"],q["+qc.data[g][4]+"];\n";
           } else if (qc.data[g][0]=="m") {
             qasm += "measure q["+qc.data[g][1]+"] -> c["+qc.data[g][2]+"];\n";
           // and...

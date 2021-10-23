@@ -24,6 +24,7 @@ int main () {
   qc.x(1);
   qc.x(2);
   qc.cccx(3, 1, 2, 4);
+  qc.cccx(0, 1, 2, 4);
   // qc.h(2);
   // qc.x(3);
   // qc.och(1,3,4);
