@@ -36,7 +36,7 @@ class QuantumCircuit {
 
   public:
 
-    int nQubits, nBits;
+    int nQubits, nBits, nStates;
     vector<vector<string>> data;
     
     QuantumCircuit (){
@@ -53,6 +53,7 @@ class QuantumCircuit {
       {
         ERROR("Only the cases nQubits=nBits and nBits=0 are allowed in MicroQiskit");
       }
+      nStates = pow(2, nQubits);
     }
 
     void add (QuantumCircuit qc2) {
@@ -61,6 +62,7 @@ class QuantumCircuit {
       //i think this is missing:
       nQubits = max(nQubits,qc2.nQubits);
       //else we run the risk of adding a circuit that has gates making reference to a qubit that is out of range.
+      nStates = pow(2, nQubits);
       for (int g=0; g<qc2.data.size(); g++){ 
         data.push_back( qc2.data[g] );
       }
@@ -72,9 +74,9 @@ class QuantumCircuit {
     void initialize (vector<double> p){
       vector<string> init;
       //verify if the size of double vector is correct
-      int t = pow(2, nQubits);
-      if( !(p.size()==t||p.size()==t*2) ){
-        ERROR("initialize: Can't initialize circuit. Please insert a vector {} with either "+to_string(t)+" or "+to_string(t*2)+" doubles");
+      // int t = pow(2, nQubits);
+      if( !(p.size()==nStates||p.size()==nStates*2) ){
+        ERROR("initialize: Can't initialize circuit. Please insert a vector {} with either "+to_string(nStates)+" or "+to_string(nStates*2)+" doubles");
       }
       data.clear();
       init.push_back("init");
@@ -349,13 +351,22 @@ class QuantumCircuit {
     void matrix (vector<double> m){
       vector<string> matrix;
       //verify if the size of double vector is correct
-      int t = pow(2, nQubits);
+      int t = nStates;
       t = t*t;
       if( !(m.size()==t||m.size()==t*2) ){
         ERROR("matrix: Please insert a vector {} with either "+to_string(t)+" or "+to_string(t*2)+" doubles/floats");
       }
       matrix.push_back("matrix");
       matrix.push_back(to_string(m.size()));
+      int fm; // is it full matrix?
+      if (m.size() == pow(nStates,2)){
+        // doesn't include complex numbers w imaginary
+        fm = 0;
+      } else {
+        // has real and imaginary = complex numbers
+        fm = 1;
+      }
+      matrix.push_back(to_string(fm));
       for(int i=0;i<m.size();i++){
         matrix.push_back(to_string(m[i]));
       }
@@ -483,33 +494,25 @@ class Simulator {
 
       } else if ( (qc.data[g][0]=="matrix") ){
         int matrixSize = stoi(qc.data[g][1]);
-        int nStates = pow(2,qc.nQubits);
-        bool fullMatrix;
-        if (matrixSize == pow(nStates,2)){
-          // doesn't include complex numbers w imaginary
-          fullMatrix = false;
-        } else {
-          // has real and imaginary = complex numbers
-          fullMatrix = true;
-        }
+        int fullMatrix = stoi(qc.data[g][2]);
         // we need a placeholder for the ket content while we perform the calculations and change the ket
         vector<vector<double>> copyket = ket;
         // multiply ket by matrix
         double sum = 0.0;
-        if (fullMatrix){
+        if (fullMatrix==1){
           // real part
           for(int i=0; i<matrixSize; i+=2){
-            sum += stod(qc.data[g][2+i]) * copyket[(i/2)%nStates][0];
-            if( ((i/2)+1) % nStates == 0 ){
-              ket[(i/2)/nStates][0] = sum;
+            sum += stod(qc.data[g][3+i]) * copyket[(i/2)%qc.nStates][0];
+            if( ((i/2)+1) % qc.nStates == 0 ){
+              ket[(i/2)/qc.nStates][0] = sum;
               sum = 0.0;
             }
           }
           // imaginary part
           for(int i=1; i<matrixSize; i+=2){
-            sum += stod(qc.data[g][2+i]) * copyket[(i/2)%nStates][1];
-            if( ((i/2)+1) % nStates == 0 ){
-              ket[(i/2)/nStates][1] = sum;
+            sum += stod(qc.data[g][3+i]) * copyket[(i/2)%qc.nStates][1];
+            if( ((i/2)+1) % qc.nStates == 0 ){
+              ket[(i/2)/qc.nStates][1] = sum;
               sum = 0.0;
             }
           }
@@ -518,49 +521,27 @@ class Simulator {
           // real part
           // cout<<"real part"<<endl;
           for(int i=0; i<matrixSize; i++){
-            sum += stod(qc.data[g][2+i]) * copyket[i%nStates][0];
+            sum += stod(qc.data[g][3+i]) * copyket[i%qc.nStates][0];
             // cout<<"i%nStates "<<i%nStates<<endl;
             // cout<<stod(qc.data[g][2+i])<<" "<<copyket[i%nStates][0]<<endl;
             // cout<<"sum "<<sum<<endl;
-            if( (i+1) % nStates == 0 ){
+            if( (i+1) % qc.nStates == 0 ){
               // cout<<"i/nStates "<<i/nStates<<endl;
-              ket[i/nStates][0] = sum;
+              ket[i/qc.nStates][0] = sum;
               sum = 0.0;
             }
           }
           // and repeat for imaginary part
           // cout<<"imaginary part"<<endl;
           for(int i=0; i<matrixSize; i++){
-            sum += stod(qc.data[g][2+i]) * copyket[i%nStates][1];
+            sum += stod(qc.data[g][3+i]) * copyket[i%qc.nStates][1];
             // cout<<"sum "<<sum<<endl;
-            if( (i+1) % nStates == 0 ){
-              ket[(i/2)/nStates][1] = sum;
+            if( (i+1) % qc.nStates == 0 ){
+              ket[(i/2)/qc.nStates][1] = sum;
               sum = 0.0;
             }
           }
         }
-        // for(int i=0; i<matrixsize; i++){
-        //   // if(matrixsize==pow(2,qc.nQubits)){
-        //   //   //if just a simple list
-        //   //   ket[i][0] = stod(qc.data[g][2+i]);
-        //   //   ket[i][1] = 0.0;
-        //   // } else {
-        //   //   //else it must be a complete list
-        //   //   ket[i/2][i%2] = stod(qc.data[g][2+i]);
-        //   // }
-        //   sum += stod(qc.data[g][2+i]) * ket[i/pow(2,qc.nQubits)][i%2];
-        //   cout<<"sumtemp "<<stod(qc.data[g][2+i])<<" and "<<ket[i/pow(2,qc.nQubits)][i%2]<<endl;
-        //   if ( (i+1) % int(pow(2,qc.nQubits)) == 0 ) {
-        //     cout<<"sum "<<sum<<endl;
-        //     int it1 = i/(pow(2,qc.nQubits)*2);
-        //     cout<<"it1"<<it1<<endl;
-        //     int it2 = i/(pow(2,qc.nQubits));
-        //     cout<<"it2"<<it2%2<<endl;
-        //     ket[it1][it2%2] = double(sum);
-        //     // ket[i/qc.nQubits][1]==0.0;
-        //     sum = 0.0;
-        //   }
-        // }
 
       } else if ( (qc.data[g][0]=="x") or (qc.data[g][0]=="rx") or (qc.data[g][0]=="h") ) {
 
@@ -886,6 +867,16 @@ class Simulator {
           } else if (qc.data[g][0]=="cccx") {
             qiskitPy += "qc.mct(["+qc.data[g][1]+","+qc.data[g][2]+","+qc.data[g][3]+"],"+qc.data[g][4]+")\n";
           } else if (qc.data[g][0]=="m") {
+            qiskitPy += "qc.measure("+qc.data[g][1]+","+qc.data[g][2]+")\n";
+          } else if (qc.data[g][0]=="matrix") {
+            // -op = Operator([
+            //       [0, 1],
+            //       [1, 0]
+            //   ])
+			      //   qc.unitary(op, [0, 1])
+            
+            qiskitPy += "op = Operator([[";
+
             qiskitPy += "qc.measure("+qc.data[g][1]+","+qc.data[g][2]+")\n";
           } else if (qc.data[g][0]=="init") {
             //TODO review to really conform with qiskit
