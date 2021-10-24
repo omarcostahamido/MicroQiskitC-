@@ -869,15 +869,32 @@ class Simulator {
           } else if (qc.data[g][0]=="m") {
             qiskitPy += "qc.measure("+qc.data[g][1]+","+qc.data[g][2]+")\n";
           } else if (qc.data[g][0]=="matrix") {
-            // -op = Operator([
-            //       [0, 1],
-            //       [1, 0]
-            //   ])
-			      //   qc.unitary(op, [0, 1])
-            
+            int matrixSize = stoi(qc.data[g][1]);
+            int fullMatrix = stoi(qc.data[g][2]);
             qiskitPy += "op = Operator([[";
-
-            qiskitPy += "qc.measure("+qc.data[g][1]+","+qc.data[g][2]+")\n";
+            if(fullMatrix==0){
+              for (int i=0; i<matrixSize; i++){
+                qiskitPy += qc.data[g][3+i];
+                if ( (i+1)%qc.nStates == 0 ){
+                  if( (i+1)/matrixSize ==1 ){
+                    qiskitPy += "]])\n";
+                  } else {
+                    qiskitPy += "],[";
+                  }
+                } else {
+                  qiskitPy +=",";
+                }
+              }
+              qiskitPy += "qc.unitary(op, [";
+              for (int i=0; i<qc.nQubits; i++){
+                qiskitPy+=to_string(i);
+                if ( (i+1)/qc.nQubits == 1 ){
+                  qiskitPy+="])\n";
+                } else {
+                  qiskitPy +=",";
+                }
+              }
+            }
           } else if (qc.data[g][0]=="init") {
             //TODO review to really conform with qiskit
             qiskitPy += "qc.initialize({"+qc.data[g][2];
