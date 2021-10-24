@@ -345,6 +345,22 @@ class QuantumCircuit {
       gate.push_back(to_string(t));
       data.push_back(gate);
     }
+    // new matrix gate
+    void matrix (vector<double> m){
+      vector<string> matrix;
+      //verify if the size of double vector is correct
+      int t = pow(2, nQubits);
+      t = t*t;
+      if( !(m.size()==t||m.size()==t*2) ){
+        ERROR("matrix: Please insert a vector {} with either "+to_string(t)+" or "+to_string(t*2)+" doubles/floats");
+      }
+      matrix.push_back("matrix");
+      matrix.push_back(to_string(m.size()));
+      for(int i=0;i<m.size();i++){
+        matrix.push_back(to_string(m[i]));
+      }
+      data.push_back(matrix);
+    }
     void measure (int q, int b) {
       vector<string> gate;
       if(!(q==b) )
@@ -464,6 +480,87 @@ class Simulator {
             ket[i/2][i%2] = stod(qc.data[g][2+i]);
           }
         }
+
+      } else if ( (qc.data[g][0]=="matrix") ){
+        int matrixSize = stoi(qc.data[g][1]);
+        int nStates = pow(2,qc.nQubits);
+        bool fullMatrix;
+        if (matrixSize == pow(nStates,2)){
+          // doesn't include complex numbers w imaginary
+          fullMatrix = false;
+        } else {
+          // has real and imaginary = complex numbers
+          fullMatrix = true;
+        }
+        // we need a placeholder for the ket content while we perform the calculations and change the ket
+        vector<vector<double>> copyket = ket;
+        // multiply ket by matrix
+        double sum = 0.0;
+        if (fullMatrix){
+          // real part
+          for(int i=0; i<matrixSize; i+=2){
+            sum += stod(qc.data[g][2+i]) * copyket[(i/2)%nStates][0];
+            if( ((i/2)+1) % nStates == 0 ){
+              ket[(i/2)/nStates][0] = sum;
+              sum = 0.0;
+            }
+          }
+          // imaginary part
+          for(int i=1; i<matrixSize; i+=2){
+            sum += stod(qc.data[g][2+i]) * copyket[(i/2)%nStates][1];
+            if( ((i/2)+1) % nStates == 0 ){
+              ket[(i/2)/nStates][1] = sum;
+              sum = 0.0;
+            }
+          }
+        } else {
+          // we have a simple matrix with only real nums
+          // real part
+          // cout<<"real part"<<endl;
+          for(int i=0; i<matrixSize; i++){
+            sum += stod(qc.data[g][2+i]) * copyket[i%nStates][0];
+            // cout<<"i%nStates "<<i%nStates<<endl;
+            // cout<<stod(qc.data[g][2+i])<<" "<<copyket[i%nStates][0]<<endl;
+            // cout<<"sum "<<sum<<endl;
+            if( (i+1) % nStates == 0 ){
+              // cout<<"i/nStates "<<i/nStates<<endl;
+              ket[i/nStates][0] = sum;
+              sum = 0.0;
+            }
+          }
+          // and repeat for imaginary part
+          // cout<<"imaginary part"<<endl;
+          for(int i=0; i<matrixSize; i++){
+            sum += stod(qc.data[g][2+i]) * copyket[i%nStates][1];
+            // cout<<"sum "<<sum<<endl;
+            if( (i+1) % nStates == 0 ){
+              ket[(i/2)/nStates][1] = sum;
+              sum = 0.0;
+            }
+          }
+        }
+        // for(int i=0; i<matrixsize; i++){
+        //   // if(matrixsize==pow(2,qc.nQubits)){
+        //   //   //if just a simple list
+        //   //   ket[i][0] = stod(qc.data[g][2+i]);
+        //   //   ket[i][1] = 0.0;
+        //   // } else {
+        //   //   //else it must be a complete list
+        //   //   ket[i/2][i%2] = stod(qc.data[g][2+i]);
+        //   // }
+        //   sum += stod(qc.data[g][2+i]) * ket[i/pow(2,qc.nQubits)][i%2];
+        //   cout<<"sumtemp "<<stod(qc.data[g][2+i])<<" and "<<ket[i/pow(2,qc.nQubits)][i%2]<<endl;
+        //   if ( (i+1) % int(pow(2,qc.nQubits)) == 0 ) {
+        //     cout<<"sum "<<sum<<endl;
+        //     int it1 = i/(pow(2,qc.nQubits)*2);
+        //     cout<<"it1"<<it1<<endl;
+        //     int it2 = i/(pow(2,qc.nQubits));
+        //     cout<<"it2"<<it2%2<<endl;
+        //     ket[it1][it2%2] = double(sum);
+        //     // ket[i/qc.nQubits][1]==0.0;
+        //     sum = 0.0;
+        //   }
+        // }
 
       } else if ( (qc.data[g][0]=="x") or (qc.data[g][0]=="rx") or (qc.data[g][0]=="h") ) {
 

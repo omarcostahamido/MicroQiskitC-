@@ -17,28 +17,35 @@ int main () {
 
   // initialize a circuit with two qubits 
   QuantumCircuit qc;
-  qc.set_registers(5);
+  qc.set_registers(1);
   // add the gates to create a Bell pair
   // qc.h(0);
-  qc.x(3);
-  qc.x(1);
-  qc.x(2);
-  qc.cccx(3, 1, 2, 4);
-  qc.cccx(0, 1, 2, 4);
+  // qc.x(3);
+  // qc.x(0);
+  // qc.x(2);
+  // qc.cccx(3, 1, 2, 4);
+  // qc.cccx(0, 1, 2, 4);
   // qc.h(2);
   // qc.x(3);
   // qc.och(1,3,4);
   // qc.ccx(2,0,1);
+  // qc.initialize({0.0,0.0,sqrt(0.5),0.0,sqrt(0.5),0.0,0.0,0.0});
+  // qc.initialize({0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0});
+  // qc.x(1);
+  // qc.matrix({1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,});
+  // qc.matrix({0.0,1.0,1.0,0.0}); 
+  qc.matrix({0.70710678,0.70710678,0.70710678,-0.70710678}); 
+  // qc.matrix({0, 0, 1, 0,  0, 0, 0, 1,  1, 0, 0, 0,  0, 1, 0, 0});
 
   // initialize another circuit with two qubits and two output bits
   QuantumCircuit meas;
-  meas.set_registers(5,5);
+  meas.set_registers(1,1);
   // add the measurements
   meas.measure(0,0);
-  meas.measure(1,1);
-  meas.measure(2,2);
-  meas.measure(3,3);
-  meas.measure(4,4);
+  // meas.measure(1,1);
+  // meas.measure(2,2);
+  // meas.measure(3,3);
+  // meas.measure(4,4);
 
   // add the measurement circuit to the end of the original circuit
   qc.add(meas);
