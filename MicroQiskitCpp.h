@@ -20,6 +20,8 @@ In development on replit (https://repl.it/@quantum_jim/MicroQiskitC) and on gith
 #include <ctime>
 #include <map>
 #include <list>
+// #include <math.h>
+// #include <complex>
 #define RESET   "\033[0m"
 #define RED     "\033[31m"      /* Red */
 #define ERROR(MESSAGE) error_handler(MESSAGE)
@@ -945,6 +947,38 @@ class Simulator {
               cccxdefined = true;
             }
             qasm += "cccx q["+qc.data[g][1]+"],q["+qc.data[g][2]+"],q["+qc.data[g][3]+"],q["+qc.data[g][4]+"];\n";
+          } else if (qc.data[g][0]=="matrix") {
+            if(qc.nQubits==1){
+              // vector<double> m = {0,1,1,0};
+              complex<double> det = stod(qc.data[g][3])*stod(qc.data[g][6])-stod(qc.data[g][4])*stod(qc.data[g][5]);
+              // cout<<"det "<<det<<endl;
+              complex<double> coeff = pow(det,(-0.5));
+                //https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.det.html#scipy.linalg.det
+              // cout<<"coeff "<<coeff<<endl;
+              double phase = atan2(coeff.imag(),coeff.real());
+                //https://docs.python.org/3/library/cmath.html
+                //https://www.cplusplus.com/reference/cmath/atan2/
+              // cout<<"phase "<<phase<<endl;
+              vector<complex<double>> su_mat;
+              for (int i=0;i<4;i++){
+                su_mat.push_back(stod(qc.data[g][i+3])*coeff);
+                // cout<<m[i]*coeff<<endl;
+              }
+              double theta = 2 * atan2(abs(su_mat[2]),abs(su_mat[0]));
+              // cout<<"theta "<<theta<<endl;
+              double phiplambda2 = atan2(su_mat[3].imag(),su_mat[3].real());
+              // cout<<"phiplambda2 "<<phiplambda2<<endl;
+              double phimlambda2 = atan2(su_mat[2].imag(),su_mat[2].real());
+              // cout<<"phimlambda2 "<<phimlambda2<<endl;
+              double phi = phiplambda2 + phimlambda2;
+              // cout<<"phi "<<phi<<endl;
+              double lam = phiplambda2 - phimlambda2;
+              // cout<<"lam "<<lam<<endl;
+              // return theta, phi, lam, phase
+              // U3Gate(theta, phi, lam)
+              qasm+="gate matrix q0 { u3("+to_string(theta)+","+to_string(phi)+","+to_string(lam)+") p0; }\n";
+              qasm+="matrix q[0];\n";
+            }
           } else if (qc.data[g][0]=="m") {
             qasm += "measure q["+qc.data[g][1]+"] -> c["+qc.data[g][2]+"];\n";
           // and...

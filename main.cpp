@@ -2,6 +2,8 @@
 #include <vector>
 #include <string>
 #include "MicroQiskitCpp.h"
+#include <math.h>
+#include <complex>
 
 using namespace std;
 
@@ -34,8 +36,39 @@ int main () {
   // qc.x(1);
   // qc.matrix({1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,});
   // qc.matrix({0.0,1.0,1.0,0.0}); 
-  qc.matrix({0.70710678,0.70710678,0.70710678,-0.70710678}); 
   // qc.matrix({0, 0, 1, 0,  0, 0, 0, 1,  1, 0, 0, 0,  0, 1, 0, 0});
+  qc.matrix({0.70710678,0.70710678,0.70710678,-0.70710678}); 
+  vector<double> m = {0,1,1,0};
+  complex<double> det = m[0]*m[3]-m[1]*m[2];
+  cout<<"det "<<det<<endl;
+  complex<double> coeff = pow(det,(-0.5));
+  cout<<"coeff "<<coeff<<endl;
+  double phase = atan2(coeff.imag(),coeff.real());
+  cout<<"phase "<<phase<<endl;
+  // su_mat = coeff * m;
+  // cout<<m.size()<<endl;
+  vector<complex<double>> su_mat;
+  for (int i=0;i<m.size();i++){
+    su_mat.push_back(m[i]*coeff);
+    // cout<<m[i]*coeff<<endl;
+  }
+  // theta = 2 * math.atan2(abs(su_mat[1, 0]), abs(su_mat[0, 0]))
+  double theta = 2 * atan2(abs(su_mat[2]),abs(su_mat[0]));
+  cout<<"theta "<<theta<<endl;
+  // phiplambda2 = cmath.phase(su_mat[1, 1])
+  double phiplambda2 = atan2(su_mat[3].imag(),su_mat[3].real());
+  cout<<"phiplambda2 "<<phiplambda2<<endl;
+  // phimlambda2 = cmath.phase(su_mat[1, 0])
+  double phimlambda2 = atan2(su_mat[2].imag(),su_mat[2].real());
+  cout<<"phimlambda2 "<<phimlambda2<<endl;
+  // phi = phiplambda2 + phimlambda2
+  // lam = phiplambda2 - phimlambda2
+  double phi = phiplambda2 + phimlambda2;
+  cout<<"phi "<<phi<<endl;
+  double lam = phiplambda2 - phimlambda2;
+  cout<<"lam "<<lam<<endl;
+  
+  // cout<<su_mat<<endl;
 
   // initialize another circuit with two qubits and two output bits
   QuantumCircuit meas;
